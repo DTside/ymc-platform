@@ -7,7 +7,14 @@ import { WagmiProvider, cookieToInitialState } from 'wagmi';
 import { config } from '@/lib/config';
 
 // Добавляем initialState для поддержки кук
-export function Providers({ children, cookie }: { children: ReactNode, cookie?: string | null }) {
+// src/app/providers.tsx
+export function Providers({ 
+  children, 
+  cookie 
+}: { 
+  children: React.ReactNode, 
+  cookie?: string | null 
+}) {
   const [queryClient] = React.useState(() => new QueryClient());
   const initialState = cookieToInitialState(config, cookie);
 
