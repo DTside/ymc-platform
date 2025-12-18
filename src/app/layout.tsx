@@ -1,30 +1,30 @@
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import '@rainbow-me/rainbowkit/styles.css';
-import { Providers } from "./providers";
-import { headers } from "next/headers"; 
+import { headers } from "next/headers"; // Импортируем headers
+import dynamic from 'next/dynamic';
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "YMC | Young Millionaires Club",
-  description: "Join the elite processing team.",
-};
+// Динамический импорт провайдеров
+const Providers = dynamic(() => import('./providers').then(mod => mod.Providers), {
+  ssr: false,
+});
 
-// 1. Добавляем ключевое слово async
+// Добавляем async перед функцией RootLayout
 export default async function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  // 2. Ждем получения заголовков (await headers())
-  const headersData = await headers();
-  const cookie = headersData.get('cookie');
+}) {
+  // Добавляем await перед headers()
+  const headerList = await headers(); 
+  const cookie = headerList.get("cookie");
 
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} bg-black text-white antialiased`}>
+        {/* Передаем cookie в Providers, если он там ожидается */}
         <Providers cookie={cookie}>
           {children}
         </Providers>

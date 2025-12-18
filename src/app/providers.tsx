@@ -1,25 +1,20 @@
 'use client';
 
-import React, { useState, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider } from 'wagmi';
+import { WagmiProvider, cookieToInitialState } from 'wagmi';
 import { config } from '@/lib/config';
 
-export function Providers({ children }: { children: ReactNode }) {
-  // 1. Создаем QueryClient внутри компонента через useState
-  const [queryClient] = useState(() => new QueryClient());
+// Добавляем initialState для поддержки кук
+export function Providers({ children, cookie }: { children: ReactNode, cookie?: string | null }) {
+  const [queryClient] = React.useState(() => new QueryClient());
+  const initialState = cookieToInitialState(config, cookie);
 
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={config} initialState={initialState}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider 
-          theme={darkTheme({
-            accentColor: '#EAB308',
-            accentColorForeground: 'black',
-            borderRadius: 'medium',
-          })}
-        >
+        <RainbowKitProvider theme={darkTheme({ accentColor: '#EAB308' })}>
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>
