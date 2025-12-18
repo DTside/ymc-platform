@@ -1,20 +1,19 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Ігноруємо помилки типізації та лінтингу під час білду
-  // Це критично для зменшення навантаження на пам'ять при деплої
+  // Игнорируем ошибки во время сборки, чтобы Vercel не падал из-за типов
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Налаштування Webpack для сумісності з крипто-бібліотеками
+  // Настройка Webpack для работы крипто-библиотек
   webpack: (config) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     return config;
   },
-  // Збільшуємо таймаут для генерації статичних сторінок
+  // Увеличиваем время генерации страниц (помогает при медленной сборке)
   staticPageGenerationTimeout: 1000,
 };
 
