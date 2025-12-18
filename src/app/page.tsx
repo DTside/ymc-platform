@@ -1,29 +1,37 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link'; // Импортируем Link для переходов
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { BackgroundAnimation } from '@/components/ui/BackgroundAnimation';
-import { ScrollReveal } from '@/components/ui/ScrollReveal';
-import { Roadmap } from '@/components/Roadmap';
-import { Stats } from '@/components/Stats';
-import { Pricing } from '@/components/Pricing';
-import { FAQ } from '@/components/Faq';
-import { BentoFeatures } from '@/components/BentoFeatures';
-import { Marquee } from '@/components/ui/Marquee';
-import { LiveDeals } from '@/components/LiveDeals';
-import { Reviews } from '@/components/Review';
-import { ArrowRight, Diamond } from 'lucide-react'; 
-import { useTracker } from '@/hooks/useTracker';
+import Link from 'next/link';
+import { Diamond, ArrowRight } from "lucide-react";
+
+// Пути исправлены в соответствии с твоим Explorer
+import { Pricing } from "@/components/Pricing";
+import { Stats } from "@/components/Stats";
+import { Roadmap } from "@/components/Roadmap";
+import { LiveDeals } from "@/components/LiveDeals";
+import { Reviews } from "@/components/Review"; // Изменено: Review -> Reviews
+import { FAQ } from "@/components/Faq"; // Изменено: Faq -> FAQ
+import { ConnectButton } from "@/components/ConnectButton";
+
+// UI компоненты
+import { Marquee } from "@/components/ui/Marquee";
+import { BackgroundAnimation } from "@/components/ui/BackgroundAnimation";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { BentoFeatures } from "@/components/BentoFeatures";
+
+import { useTracker } from "@/hooks/useTracker";
+
+
 
 export default function Home() {
+  // Трекер рефералов через Supabase продолжает работать
   useTracker();
+
   return (
     <main className="relative min-h-screen flex flex-col items-center overflow-hidden font-sans bg-black">
       <BackgroundAnimation />
       
       {/* --- NAVBAR --- */}
-      <nav className="absolute top-4 md:top-8 left-1/2 -translate-x-1/2 w-[95%] md:w-[90%] max-w-6xl z-50 glass rounded-2xl px-4 md:px-8 py-3 md:py-5 flex justify-between items-center">
+      <nav className="absolute top-4 md:top-8 left-1/2 -translate-x-1/2 w-[95%] md:w-[90%] max-w-6xl z-50 bg-zinc-900/40 backdrop-blur-md border border-white/5 rounded-2xl px-4 md:px-8 py-3 md:py-5 flex justify-between items-center">
          <Link href="/" className="flex items-center gap-2 md:gap-3 group cursor-pointer">
             <div className="h-8 w-8 md:h-12 md:w-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-lg md:rounded-xl flex items-center justify-center rotate-3 shadow-lg transition-transform group-hover:rotate-12 duration-500">
               <Diamond className="text-black w-5 h-5 md:w-7 md:h-7" />
@@ -39,7 +47,7 @@ export default function Home() {
          </div>
 
          <div className="scale-90 md:scale-100">
-            <ConnectButton showBalance={false} chainStatus="none" />
+            <ConnectButton />
          </div>
       </nav>
 
@@ -53,11 +61,11 @@ export default function Home() {
 
         <ScrollReveal delay={0.2}>
             <h1 className="text-4xl sm:text-7xl md:text-[110px] font-black tracking-tighter mb-8 text-white leading-[0.85] uppercase italic">
-            YOUNG <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-200 text-gold-glow">
-                MILLIONAIRES
-            </span> <br/>
-            CLUB
+              YOUNG <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-500 to-yellow-200">
+                  MILLIONAIRES
+              </span> <br/>
+              CLUB
             </h1>
         </ScrollReveal>
 
@@ -70,7 +78,6 @@ export default function Home() {
         
         <ScrollReveal delay={0.6} className="w-full sm:w-auto">
             <div className="flex flex-col sm:flex-row gap-5 w-full px-6 sm:px-0 justify-center">
-                {/* КНОПКА JOIN CLUB: Переход к секции цен */}
                 <Link 
                   href="#pricing" 
                   className="w-full sm:px-14 py-5 md:py-7 bg-white text-black rounded-2xl font-black text-sm md:text-xl transition-all hover:scale-105 shadow-xl flex items-center justify-center gap-3 uppercase italic"
@@ -79,7 +86,6 @@ export default function Home() {
                   <ArrowRight className="w-5 h-5 md:w-6 md:h-6"/>
                 </Link>
                 
-                {/* КНОПКА ABOUT: Переход на страницу About */}
                 <Link 
                   href="/about" 
                   className="w-full sm:px-14 py-5 md:py-7 bg-zinc-900/50 text-white border border-white/10 rounded-2xl font-black text-sm md:text-xl backdrop-blur-sm flex justify-center items-center uppercase italic hover:bg-zinc-800 transition-colors"
@@ -90,7 +96,7 @@ export default function Home() {
         </ScrollReveal>
       </section>
 
-      {/* --- Остальные секции с ID для якорей --- */}
+      {/* --- CONTENT SECTIONS --- */}
       <Marquee />
       <Stats />
       <LiveDeals />
@@ -107,7 +113,6 @@ export default function Home() {
         <Marquee />
       </div>
 
-      {/* ID pricing для работы кнопки Join Club */}
       <div id="pricing" className="w-full scroll-mt-24">
         <Pricing />
       </div>
@@ -118,6 +123,7 @@ export default function Home() {
         <FAQ />
       </div>
 
+      {/* --- FINAL CTA --- */}
       <section className="py-32 md:py-52 px-4 text-center w-full relative">
         <ScrollReveal>
             <div className="max-w-5xl mx-auto p-10 md:p-24 rounded-[3rem] md:rounded-[5rem] bg-gradient-to-b from-zinc-900/50 to-black border border-white/10 relative overflow-hidden backdrop-blur-sm">
@@ -131,29 +137,29 @@ export default function Home() {
         </ScrollReveal>
       </section>
 
+      {/* --- FOOTER --- */}
       <footer className="w-full py-16 border-t border-white/5 bg-zinc-950/80 backdrop-blur-md">
-  <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-8 gap-10">
-    <div className="flex flex-col items-center md:items-start gap-2">
-      <div className="text-white font-black italic tracking-widest text-sm uppercase">YMC CLUB</div>
-      <div className="text-zinc-600 text-[10px] font-bold tracking-[0.3em] uppercase">
-        &copy; 2025. All rights reserved.
-      </div>
-    </div>
-    
-    <div className="flex gap-8">
-      {/* РЕАЛЬНЫЕ ССЫЛКИ */}
-      <Link href="/terms" className="text-zinc-500 hover:text-yellow-500 text-[10px] font-black uppercase tracking-widest transition-colors">
-        Terms
-      </Link>
-      <Link href="/privacy" className="text-zinc-500 hover:text-yellow-500 text-[10px] font-black uppercase tracking-widest transition-colors">
-        Privacy
-      </Link>
-      <a href="#" className="text-zinc-500 hover:text-yellow-500 text-[10px] font-black uppercase tracking-widest transition-colors">
-        Telegram
-      </a>
-    </div>
-  </div>
-</footer>
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center px-8 gap-10">
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <div className="text-white font-black italic tracking-widest text-sm uppercase">YMC CLUB</div>
+            <div className="text-zinc-600 text-[10px] font-bold tracking-[0.3em] uppercase">
+              &copy; 2025. All rights reserved.
+            </div>
+          </div>
+          
+          <div className="flex gap-8">
+            <Link href="/terms" className="text-zinc-500 hover:text-yellow-500 text-[10px] font-black uppercase tracking-widest transition-colors">
+              Terms
+            </Link>
+            <Link href="/privacy" className="text-zinc-500 hover:text-yellow-500 text-[10px] font-black uppercase tracking-widest transition-colors">
+              Privacy
+            </Link>
+            <a href="#" className="text-zinc-500 hover:text-yellow-500 text-[10px] font-black uppercase tracking-widest transition-colors">
+              Telegram
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
