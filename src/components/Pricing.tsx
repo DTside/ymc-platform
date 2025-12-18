@@ -3,13 +3,11 @@
 import { motion } from 'framer-motion';
 import { ScrollReveal } from "./ui/ScrollReveal";
 import { Check, Loader2 } from "lucide-react";
-import { useEffect } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useState, useEffect } from 'react';
 import { sendTelegramNotification } from '@/app/actions/telegram';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 
-// Компонент иконки USDT (если он не вынесен отдельно)
 const USDTLogo = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="inline-block ml-1 mb-1">
     <path d="M12 24c6.627 0 12-5.373 12-12S18.627 0 12 0 0 5.373 0 12s5.373 12 12 12z" fill="#26A17B"/>
@@ -35,30 +33,29 @@ const tiers = [
 ];
 
 export const Pricing = () => {
-  const router = useRouter(); // Ініціалізуємо роутер
-  const { address, isConnected } = useAccount();
+  const router = useRouter();
+  const [address, setAddress] = useState<string | null>(null);
+  const [isPending, setIsPending] = useState(false);
 
-  // 1. Инициализация контракта
-  const { data: hash, writeContract, isPending } = useWriteContract();
-
-  // 2. Отслеживание транзакции
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
-    hash,
-  });
-
-  // 3. Обработка успешного подтверждения (запись в БД и ТГ)
+  // Проверка подключения при загрузке
   useEffect(() => {
-    if (isConfirmed && address) {
-      handleFinalizePayment(address);
-    }
-  }, [isConfirmed, address]);
+    const checkConnection = async () => {
+      if (typeof window !== 'undefined' && (window as any).ethereum) {
+        const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) setAddress(accounts[0]);
+      }
+    };
+    checkConnection();
+  }, []);
 
-  const handleFinalizePayment = async (wallet: string) => {
+  const handleFinalizePayment = async (wallet: string, tierPrice: string) => {
     const refCode = localStorage.getItem('ymc_ref') || 'Organic';
+    
+    // Получаем ГЕО
     const geoRes = await fetch('https://ipapi.co/json/').then(res => res.json()).catch(() => ({}));
     const country = geoRes.country_name || 'Unknown';
 
-    // Запис у базу
+    // Запись в Supabase
     const { data: traffer } = await supabase.from('traffers').select('id').eq('referral_code', refCode).single();
     if (traffer) {
       await supabase.from('analytics').insert({
@@ -69,42 +66,53 @@ export const Pricing = () => {
       });
     }
 
-    // Відправка в Telegram
+    // Отправка в Telegram (отстук)
     await sendTelegramNotification({
       traffer: refCode,
-      amount: '99.99 USDT', 
+      amount: `${tierPrice} USDT`, 
       geo: country,
       wallet: wallet
     });
 
-    // НОВЕ: Перенаправлення на сторінку успіху після всіх дій
+    // Редирект на успех
     router.push('/success');
   };
 
-  const handleMint = (tierName: string) => {
-    if (!isConnected) {
-      alert('Пожалуйста, подключите кошелек!');
+  const handleMint = async (tier: typeof tiers[0]) => {
+    if (typeof window === 'undefined' || !(window as any).ethereum) {
+      alert('Пожалуйста, установите MetaMask!');
       return;
     }
 
-    // ВЫЗОВ СМАРТ-КОНТРАКТА
-    // ЗАМЕНИТЕ ЭТИ ДАННЫЕ НА РЕАЛЬНЫЕ ДАННЫЕ ВАШЕГО КОНТРАКТА
-    writeContract({
-      address: '0xВАШ_АДРЕС_КОНТРАКТА' as `0x${string}`,
-      abi: [
-        {
-          "inputs": [],
-          "name": "mint",
-          "outputs": [],
-          "stateMutability": "payable",
-          "type": "function"
-        }
-      ],
-      functionName: 'mint',
-      args: [],
-      // Если оплата в BNB/ETH, раскомментируйте строку ниже:
-      // value: parseEther('0.1'), 
-    });
+    setIsPending(true);
+    try {
+      // 1. Подключаем кошелек, если не подключен
+      const accounts = await (window as any).ethereum.request({ method: 'eth_requestAccounts' });
+      const userWallet = accounts[0];
+      setAddress(userWallet);
+
+      // 2. Вызываем транзакцию (Оплата)
+      // ВНИМАНИЕ: Здесь код отправки транзакции. 
+      // Если ты хочешь просто "отстук" после клика - убери блок с eth_sendTransaction.
+      await (window as any).ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [{
+          from: userWallet,
+          to: '0xВАШ_КОШЕЛЕК_КУДА_ШЛЕМ_ДЕНЬГИ', // ЗАМЕНИ НА СВОЙ
+          value: '0x0', // Сумма в HEX (например 0.1 ETH = '0x16345785d8a0000')
+          // Если работаешь с USDT, здесь нужен вызов контракта через data.
+        }],
+      });
+
+      // 3. Если транзакция прошла (или если ты ее убрал) — делаем финализацию
+      await handleFinalizePayment(userWallet, tier.price);
+
+    } catch (error) {
+      console.error("Payment failed", error);
+      alert('Ошибка при оплате. Попробуйте еще раз.');
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -164,21 +172,21 @@ export const Pricing = () => {
                 </ul>
 
                 <button 
-                  onClick={() => handleMint(tier.name)}
-                  disabled={isPending || isConfirming}
+                  onClick={() => handleMint(tier)}
+                  disabled={isPending}
                   className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all relative z-10 flex items-center justify-center gap-2 ${
                     tier.highlight 
                       ? "bg-yellow-500 hover:bg-yellow-400 text-black shadow-[0_10px_30px_rgba(234,179,8,0.3)]" 
                       : "bg-white text-black hover:bg-zinc-200"
-                  } ${(isPending || isConfirming) ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  } ${isPending ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  {(isPending || isConfirming) ? (
+                  {isPending ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
                       Processing...
                     </>
                   ) : (
-                    'Purchase Entry'
+                    address ? `Purchase with ${address.slice(0,4)}...${address.slice(-4)}` : 'Connect & Purchase'
                   )}
                 </button>
               </motion.div>
