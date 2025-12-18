@@ -1,25 +1,25 @@
 import type { NextConfig } from 'next';
 
 const nextConfig = {
-  // 1. Пропускаем ошибки типов и линтинга при сборке
+  // 1. Полностью игнорируем ошибки типов и линтинга при билде
   typescript: {
     ignoreBuildErrors: true,
   },
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // 2. Настройка Webpack для работы Web3 (WalletConnect, Pino)
+  // 2. Настройка Webpack для работы крипто-библиотек (pino, walletconnect)
   webpack: (config: any) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
     return config;
   },
-  // 3. Ограничиваем нагрузку, чтобы не было ошибки WorkerError
+  // 3. Устранение WorkerError: отключаем параллельные потоки
   experimental: {
     workerThreads: false,
     cpus: 1,
   },
-  // Увеличиваем время ожидания генерации страниц
-  staticPageGenerationTimeout: 1000,
-} as any; // Это приведение типов уберет все красные подчеркивания
+  // Увеличиваем время ожидания для тяжелых страниц
+  staticPageGenerationTimeout: 1200,
+} as any; // Этот хак уберет все красные подчеркивания в VS Code
 
 export default nextConfig;
