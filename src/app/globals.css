@@ -1,26 +1,36 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer utilities {
+  /* Эффект матового стекла */
+  .glass {
+    @apply backdrop-blur-xl bg-black/40 border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)];
+  }
+  
+  /* Золотое свечение для текста */
+  .text-gold-glow {
+    text-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+  }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Тонкая градиентная граница */
+  .border-gradient {
+    border: 1px solid;
+    border-image-source: linear-gradient(to bottom right, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Кастомный скроллбар (тонкий и стильный) */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #eab308;
 }
