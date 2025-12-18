@@ -1,21 +1,22 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider, cookieToInitialState } from 'wagmi';
 import { config } from '@/lib/config';
 
-// Добавляем initialState для поддержки кук
-// src/app/providers.tsx
 export function Providers({ 
   children, 
   cookie 
 }: { 
-  children: React.ReactNode, 
+  children: ReactNode, 
   cookie?: string | null 
 }) {
-  const [queryClient] = React.useState(() => new QueryClient());
+  // 1. Инициализируем QueryClient внутри useState, чтобы он не пересоздавался при ререндерах
+  const [queryClient] = useState(() => new QueryClient());
+
+  // 2. Получаем начальное состояние из кук для гидратации Wagmi
   const initialState = cookieToInitialState(config, cookie);
 
   return (
