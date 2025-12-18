@@ -1,25 +1,35 @@
 import type { NextConfig } from 'next';
 
-const nextConfig = {
-  // 1. Полностью игнорируем ошибки типов и линтинга при билде
+const nextConfig: NextConfig = {
+  // 1. Игнорируем только ошибки типов (eslint больше не нужен здесь)
   typescript: {
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  // 2. Настройка Webpack для работы крипто-библиотек (pino, walletconnect)
-  webpack: (config: any) => {
+
+  // 2. В Next.js 16 turbopack настраивается на верхнем уровне
+  turbopack: {}, 
+
+  // 3. Настройка Webpack для крипто-библиотек
+  webpack: (config, { isServer }) => {
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
     return config;
   },
-  // 3. Устранение WorkerError: отключаем параллельные потоки
+
+  // 4. Ограничение ресурсов для стабильности
   experimental: {
     workerThreads: false,
     cpus: 1,
   },
-  // Увеличиваем время ожидания для тяжелых страниц
+
   staticPageGenerationTimeout: 1200,
-} as any; // Этот хак уберет все красные подчеркивания в VS Code
+};
 
 export default nextConfig;
