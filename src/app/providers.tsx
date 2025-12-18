@@ -1,28 +1,31 @@
 'use client';
 
-import React, { ReactNode, useState } from 'react';
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { WagmiProvider, cookieToInitialState } from 'wagmi';
-import { config } from '@/lib/config';
+import { ReactNode } from 'react';
+import { RainbowKitProvider, getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { WagmiProvider, http } from 'wagmi';
+import { mainnet } from 'wagmi/chains';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 
-export function Providers({ 
-  children, 
-  cookie 
-}: { 
-  children: ReactNode, 
-  cookie?: string | null 
-}) {
-  // 1. Инициализируем QueryClient внутри useState, чтобы он не пересоздавался при ререндерах
-  const [queryClient] = useState(() => new QueryClient());
+// Обязательно экспортируем интерфейс пропсов
+interface ProvidersProps {
+  children: ReactNode;
+  cookie?: string | null;
+}
 
-  // 2. Получаем начальное состояние из кук для гидратации Wagmi
-  const initialState = cookieToInitialState(config, cookie);
+const config = getDefaultConfig({
+  appName: 'Crypto App',
+  projectId: 'YOUR_PROJECT_ID',
+  chains: [mainnet],
+  transports: { [mainnet.id]: http() },
+});
 
+const queryClient = new QueryClient();
+
+export function Providers({ children, cookie }: ProvidersProps) {
   return (
-    <WagmiProvider config={config} initialState={initialState}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={darkTheme({ accentColor: '#EAB308' })}>
+        <RainbowKitProvider>
           {children}
         </RainbowKitProvider>
       </QueryClientProvider>
