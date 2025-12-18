@@ -1,7 +1,12 @@
+import { Inter } from "next/font/google";
+import "./globals.css";
+import '@rainbow-me/rainbowkit/styles.css';
 import { headers } from "next/headers";
-import dynamic from 'next/dynamic';
+import dynamic from 'next/dynamic'; // Тільки цей імпорт для динаміки
 
-// ТОЛЬКО ТАК: обычный импорт Providers выше должен быть УДАЛЕН
+const inter = Inter({ subsets: ["latin"] });
+
+// Імпортуємо Providers ТІЛЬКИ ТАК
 const Providers = dynamic(() => import('./providers').then(mod => mod.Providers), {
   ssr: false,
 });
